@@ -1,25 +1,40 @@
 from flask import Blueprint, request, jsonify
 from models import db, Account
-from utils.encryption import encrypt
+from utils.encryption import encrypt, decrypt
 
-account_bp = Blueprint('account', __name__)
+bp = Blueprint('account_routes', __name__, url_prefix='/accounts')
 
-@account_bp.route('/add', methods=['POST'])
+@bp.route('/add', methods=['POST'])
 def add_account():
-    data = request.json
-    name = data.get('name')
-    access_key = data.get('access_key')
-    secret_key = data.get('secret_key')
-
-    if not name or not access_key or not secret_key:
-        return jsonify({'error': 'All fields are required'}), 400
-
-    # Encrypt the credentials
+    account_name = request.form['account_name']
+    access_key = request.form['access_key']
+    secret_key = request.form['secret_key']
+    
+    # Encrypt keys
     encrypted_access_key = encrypt(access_key)
     encrypted_secret_key = encrypt(secret_key)
 
-    account = Account(name=name, access_key=encrypted_access_key, secret_key=encrypted_secret_key)
-    db.session.add(account)
+    new_account = Account(
+        account_name=account_name,
+        access_key=encrypted_access_key,
+        secret_key=encrypted_secret_key
+    )
+    
+    db.session.add(new_account)
     db.session.commit()
 
-    return jsonify({'message': 'Account added successfully'}), 201
+    return jsonify({"message": "Account added successfully!"})
+
+@bp.route('/list', methods=['GET'])
+def list_accounts():
+    accounts = Account.query.all()
+    decrypted_accounts = []
+    
+    for account in accounts:
+        decrypted_accounts.append({
+            "account_name": account.account_name,
+            "access_key": decrypt(account.access_key),
+            "secret_key": decrypt(account.secret_key)
+        })
+    
+    return jsonify(decrypted_accounts)
