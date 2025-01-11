@@ -42,3 +42,17 @@ def list_accounts():
         })
     
     return jsonify(decrypted_accounts)
+
+@bp.route('/delete/<int:account_id>', methods=['DELETE'])
+def delete_account(account_id):
+    # Fetch the account by ID
+    account = Account.query.get(account_id)
+    
+    if not account:
+        return jsonify({"error": "Account not found"}), 404
+    
+    # Delete the account
+    db.session.delete(account)
+    db.session.commit()
+
+    return jsonify({"message": f"Account with ID {account_id} deleted successfully!"})
