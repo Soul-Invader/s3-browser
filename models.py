@@ -1,10 +1,7 @@
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from db import db  # Import db from db.py
 
 class Account(db.Model):
-    __tablename__ = 'accounts'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)
+    account_name = db.Column(db.String(100), nullable=False)
     access_key = db.Column(db.String(200), nullable=False)
     secret_key = db.Column(db.String(200), nullable=False)

@@ -1,14 +1,17 @@
 from flask import Blueprint, request, jsonify
-from models import db, Account
+from models import Account
 from utils.encryption import encrypt, decrypt
+from db import db
 
 bp = Blueprint('account_routes', __name__, url_prefix='/accounts')
 
 @bp.route('/add', methods=['POST'])
 def add_account():
-    account_name = request.form['account_name']
-    access_key = request.form['access_key']
-    secret_key = request.form['secret_key']
+    data = request.get_json()  # Get JSON data from the request
+    
+    account_name = data.get('account_name')  # Access account_name from the JSON data
+    access_key = data.get('access_key')
+    secret_key = data.get('secret_key')
     
     # Encrypt keys
     encrypted_access_key = encrypt(access_key)
@@ -32,6 +35,7 @@ def list_accounts():
     
     for account in accounts:
         decrypted_accounts.append({
+            "id": account.id,
             "account_name": account.account_name,
             "access_key": decrypt(account.access_key),
             "secret_key": decrypt(account.secret_key)
