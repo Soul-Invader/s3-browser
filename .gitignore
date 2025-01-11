@@ -2,3 +2,4 @@ s3-browser-venv/
 __pycache__/
 *.pyc
 .env
+k8s/secrets.yaml
