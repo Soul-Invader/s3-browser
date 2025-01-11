@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: s3-browser
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: s3-browser
+  template:
+    metadata:
+      labels:
+        app: s3-browser
+    spec:
+      containers:
+      - name: s3-browser
+        image: s3-browser:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - secretRef:
+            name: s3-browser-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: s3-browser
+spec:
+  type: NodePort
+  ports:
+  - port: 5000
+    targetPort: 5000
+    nodePort: 30500
+  selector:
+    app: s3-browser
